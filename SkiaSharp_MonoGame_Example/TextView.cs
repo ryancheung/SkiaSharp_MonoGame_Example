@@ -103,14 +103,14 @@ namespace SkiaSharp_MonoGame_Example
                     paint.StrokeWidth = 1;
                     paint.IsStroke = true;
 
-                    // Enable fake Italic effect 
-                    paint.TextSkewX = -0.5F;
-
                     SKRect textBounds = new SKRect();
                     paint.MeasureText(Text, ref textBounds);
 
                     canvas.Clear(SKColor.Empty);
                     canvas.DrawText(Text, new SKPoint(0, -textBounds.Top), paint);
+
+                    // Enable Underline Effect
+                    canvas.DrawLine(new SKPoint(textBounds.Left, textBounds.Height), new SKPoint(textBounds.Left + textBounds.Width, textBounds.Height), paint);
 
                     Texture = new Texture2D(batch.GraphicsDevice, _size.X, _size.Y, false, SurfaceFormat.Color);
                     Texture.SetData(bitmap.Bytes);
