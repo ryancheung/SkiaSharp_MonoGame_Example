@@ -16,6 +16,8 @@ namespace SkiaSharp_MonoGame_Example
         IMEHandler imeHandler;
         string inputContent;
 
+        TextView textViewTitle;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -38,10 +40,12 @@ namespace SkiaSharp_MonoGame_Example
         /// </summary>
         protected override void Initialize()
         {
-            imeHandler = IMEHandler.Create(this);
+            imeHandler = IMEHandler.Create(this, true);
             imeHandler.TextInput += ImeHandler_TextInput;
 
             IsMouseVisible = true;
+
+            textViewTitle = new TextView("Press F1 to toggle IME.", new Point(250, 80), 20) { TextColor = Color.Orange };
 
             base.Initialize();
         }
@@ -95,7 +99,13 @@ namespace SkiaSharp_MonoGame_Example
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            if (Keyboard.GetState().IsKeyDown(Keys.F1))
+            {
+                if (imeHandler.Enabled)
+                    imeHandler.StopTextComposition();
+                else
+                    imeHandler.StartTextComposition();
+            }
 
             base.Update(gameTime);
         }
@@ -108,7 +118,7 @@ namespace SkiaSharp_MonoGame_Example
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            textViewTitle.Draw(spriteBatch, new Point(10,10), Color.White);
 
             base.Draw(gameTime);
         }
