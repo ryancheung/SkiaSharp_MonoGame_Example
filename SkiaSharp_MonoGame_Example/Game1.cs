@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.IMEHelper;
 
 namespace SkiaSharp_MonoGame_Example
 {
@@ -12,10 +13,21 @@ namespace SkiaSharp_MonoGame_Example
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        IMEHandler imeHandler;
+        string inputContent;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreparingDeviceSettings += Graphics_PreparingDeviceSettings;
+
             Content.RootDirectory = "Content";
+        }
+
+        private void Graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
+        {
+            e.GraphicsDeviceInformation.PresentationParameters.BackBufferWidth = 1024;
+            e.GraphicsDeviceInformation.PresentationParameters.BackBufferHeight = 800;
         }
 
         /// <summary>
@@ -26,9 +38,30 @@ namespace SkiaSharp_MonoGame_Example
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            imeHandler = IMEHandler.Create(this);
+            imeHandler.TextInput += ImeHandler_TextInput;
+
+            IsMouseVisible = true;
 
             base.Initialize();
+        }
+
+        private void ImeHandler_TextInput(object sender, MonoGame.IMEHelper.TextInputEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Keys.Back:
+                    if (inputContent.Length > 0)
+                        inputContent = inputContent.Remove(inputContent.Length - 1, 1);
+                    break;
+                case Keys.Enter:
+                case Keys.Escape:
+                    inputContent = "";
+                    break;
+                default:
+                    inputContent += e.Character;
+                    break;
+            }
         }
 
         /// <summary>
