@@ -47,9 +47,6 @@
     <Compile Include="TextView.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -61,6 +58,9 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.WindowsDX">
+      <Version>3.7.1.189</Version>
+    </PackageReference>
     <PackageReference Include="MonoGame.IMEHelper.WindowsDX">
       <Version>0.2.0</Version>
     </PackageReference>
