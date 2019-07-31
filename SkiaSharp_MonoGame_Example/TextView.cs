@@ -9,9 +9,23 @@ using SkiaSharp;
 
 namespace SkiaSharp_MonoGame_Example
 {
+    public class TextLine
+    {
+        public TextLine(int width, string line)
+        {
+            Width = width;
+            Line = line;
+        }
+
+        public int Width { get; }
+        public string Line { get; }
+    }
+
     public class TextView
     {
         public static SKTypeface DefaultTypeface;
+
+        public static string[] NewLines = new[] { Environment.NewLine, "\n", "\r", "\r\n" };
 
         static TextView()
         {
@@ -23,7 +37,10 @@ namespace SkiaSharp_MonoGame_Example
         public bool MultilineMode { get; set; } = false;
         public Color TextColor { get; set; } = Color.Black;
 
-        public Point _size;
+        public int RealWidth { get; private set; }
+        public int RealHeight { get; private set; }
+
+        private Point _size;
         public Point Size
         {
             get { return _size; }
@@ -84,6 +101,42 @@ namespace SkiaSharp_MonoGame_Example
         const float ShadowSigmaX = 1.0F;
         const float ShadowSigmaY = 1.0F;
 
+        public List<TextLine> SplitLines(SKPaint paint)
+        {
+            var result = new List<TextLine>();
+
+            var lines = Text.Split(NewLines, StringSplitOptions.None);
+
+            foreach (var line in lines)
+            {
+                if (_size.X <= 0)
+                {
+                    var width = (int)paint.MeasureText(line);
+                    result.Add(new TextLine(width, line));
+                    continue;
+                }
+
+                int restLineLength = line.Length;
+                var restLineText = line;
+                while (restLineLength > 0)
+                {
+                    var measuredLength = (int)paint.BreakText(restLineText, _size.X, out float measuredWidth, out string measuredText);
+
+                    restLineLength -= measuredLength;
+                    restLineText = restLineText.Substring(measuredLength, restLineLength);
+
+                    if (measuredWidth > RealWidth)
+                        RealWidth = (int)measuredWidth;
+
+                    result.Add(new TextLine((int)measuredWidth, measuredText));
+                }
+            }
+
+            RealHeight = (int)((result.Count * paint.FontSpacing) - paint.FontMetrics.Leading);
+
+            return result;
+        }
+
         public void Draw(SpriteBatch batch, Point position, Color color)
         {
             batch.Begin();
@@ -107,22 +160,44 @@ namespace SkiaSharp_MonoGame_Example
                         SKDropShadowImageFilterShadowMode.DrawShadowAndForeground);
 
                     // Enable Text Stroke
-                    paint.StrokeCap = SKStrokeCap.Square;
-                    paint.StrokeWidth = 1;
-                    paint.IsStroke = true;
-
-                    SKRect textBounds = new SKRect();
-                    paint.MeasureText(Text, ref textBounds);
-
-                    float measuredWidth;
-                    string measuredText;
-                    var a = paint.BreakText(Text, 100, out measuredWidth, out measuredText);
+                    //paint.StrokeCap = SKStrokeCap.Square;
+                    //paint.StrokeWidth = 1;
+                    //paint.IsStroke = true;
 
                     canvas.Clear(SKColor.Empty);
-                    canvas.DrawText(Text, new SKPoint(0, -textBounds.Top), paint);
 
-                    // Enable Underline Effect
-                    canvas.DrawLine(new SKPoint(textBounds.Left, textBounds.Height), new SKPoint(textBounds.Left + textBounds.Width, textBounds.Height), paint);
+                    var textOffsetY = -paint.FontMetrics.Ascent;
+                    var underline = paint.FontMetrics.UnderlinePosition ?? paint.FontMetrics.Descent;
+                    var underlineOffsetY = textOffsetY + underline;
+
+                    var lines = SplitLines(paint);
+
+                    int counter = 0;
+                    foreach (var line in lines)
+                    {
+                        var textPosition = new SKPoint(0, textOffsetY + counter * paint.FontSpacing);
+                        canvas.DrawText(line.Line, textPosition, paint);
+
+                        // Enable Underline Effect
+                        {
+                            var underlinePosition1 = new SKPoint(0, underlineOffsetY + counter * paint.FontSpacing);
+                            var underlinePosition2 = new SKPoint(0 + line.Width, underlineOffsetY + counter * paint.FontSpacing);
+                            paint.StrokeWidth = paint.FontMetrics.UnderlineThickness ?? 1;
+                            paint.IsStroke = true;
+                            canvas.DrawLine(underlinePosition1, underlinePosition2, paint);
+
+                            paint.IsStroke = false;
+                        }
+
+                        counter++;
+                    }
+
+                    // Top of Text box.
+                    canvas.DrawLine(new SKPoint(0, 1), new SKPoint(RealWidth, 1), paint);
+                    // Bottom of Text box.
+                    canvas.DrawLine(new SKPoint(0, 1 + RealHeight), new SKPoint(RealWidth, 1 + RealHeight), paint);
+                    // Bottom of canvas.
+                    canvas.DrawLine(new SKPoint(0, _size.Y - 1), new SKPoint(RealWidth, _size.Y - 1), paint);
 
                     Texture = new Texture2D(batch.GraphicsDevice, _size.X, _size.Y, false, SurfaceFormat.Color);
                     Texture.SetData(bitmap.Bytes);

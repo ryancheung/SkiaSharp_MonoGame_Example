@@ -45,7 +45,7 @@ namespace SkiaSharp_MonoGame_Example
 
             IsMouseVisible = true;
 
-            textViewTitle = new TextView("Press F1 to toggle IME.", new Point(250, 80), 20) { TextColor = Color.Orange };
+            textViewTitle = new TextView("Press F1 to toggle IME.", new Point(250, 260), 20) { TextColor = Color.Orange };
 
             base.Initialize();
         }
@@ -118,7 +118,7 @@ namespace SkiaSharp_MonoGame_Example
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            textViewTitle.Draw(spriteBatch, new Point(10,10), Color.White);
+            textViewTitle.Draw(spriteBatch, new Point(200,50), Color.White);
 
             base.Draw(gameTime);
         }
