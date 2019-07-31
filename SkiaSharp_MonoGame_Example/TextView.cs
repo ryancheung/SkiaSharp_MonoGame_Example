@@ -11,6 +11,13 @@ namespace SkiaSharp_MonoGame_Example
 {
     public class TextView
     {
+        public static SKTypeface DefaultTypeface;
+
+        static TextView()
+        {
+            DefaultTypeface = SKTypeface.FromFile("Content/simsun.ttf");
+        }
+
         public string Text { get; set; } = string.Empty;
         public Texture2D Texture { get; private set; }
         public bool MultilineMode { get; set; } = false;
@@ -86,6 +93,7 @@ namespace SkiaSharp_MonoGame_Example
                 using (SKCanvas canvas = new SKCanvas(bitmap))
                 using (SKPaint paint = new SKPaint())
                 {
+                    paint.Typeface = DefaultTypeface;
                     paint.TextSize = _textSize;
                     paint.Color = new SKColor(TextColor.R, TextColor.G, TextColor.B, TextColor.A);
 
@@ -105,6 +113,10 @@ namespace SkiaSharp_MonoGame_Example
 
                     SKRect textBounds = new SKRect();
                     paint.MeasureText(Text, ref textBounds);
+
+                    float measuredWidth;
+                    string measuredText;
+                    var a = paint.BreakText(Text, 100, out measuredWidth, out measuredText);
 
                     canvas.Clear(SKColor.Empty);
                     canvas.DrawText(Text, new SKPoint(0, -textBounds.Top), paint);
