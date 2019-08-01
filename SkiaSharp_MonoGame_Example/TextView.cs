@@ -182,7 +182,7 @@ namespace SkiaSharp_MonoGame_Example
                         {
                             var underlinePosition1 = new SKPoint(0, underlineOffsetY + counter * paint.FontSpacing);
                             var underlinePosition2 = new SKPoint(0 + line.Width, underlineOffsetY + counter * paint.FontSpacing);
-                            paint.StrokeWidth = paint.FontMetrics.UnderlineThickness ?? 1;
+                            paint.StrokeWidth = (int)(paint.FontMetrics.UnderlineThickness ?? 1);
                             paint.IsStroke = true;
                             canvas.DrawLine(underlinePosition1, underlinePosition2, paint);
 
